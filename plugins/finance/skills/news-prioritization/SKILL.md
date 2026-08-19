@@ -131,11 +131,31 @@ Range: −2 to 30
 
 ### Signal Strength
 
-| Condition | Signal |
-|-----------|--------|
-| Score ≥ 22 AND Portfolio Relevance ≥ 4 | 🔴 STRONG |
-| Score 18–21 OR Portfolio Relevance 3–4 | 🟡 MODERATE |
-| Score < 18 AND Portfolio Relevance ≤ 2 | ⚪ WEAK |
+Evaluate **in order** and stop at the first match. Every item gets a signal.
+
+| # | Condition | Signal |
+|---|-----------|--------|
+| 1 | Score ≥ 22 **and** Portfolio Relevance ≥ 4 | 🔴 STRONG |
+| 2 | Score ≥ 18 **or** Portfolio Relevance ≥ 3 | 🟡 MODERATE |
+| 3 | anything else | ⚪ WEAK |
+
+The earlier version of this table used three independent conditions and left holes: a
+global macro shock with no portfolio exposure (Score 24, Relevance 2) matched none of
+them, so an item rated **A / High Conviction** had no signal to print and the summary
+counters did not sum to the item count. Ordered evaluation with a catch-all fixes that.
+
+**Degraded mode — no universe file.** When Step 0 found no universe, Portfolio Relevance
+is `n/a`, which makes rows 1 and 3 unreachable and would push everything into MODERATE.
+Score on the core alone instead, and label the output:
+
+| Core score (0–25) | Signal |
+|---|---|
+| ≥ 22 | 🔴 STRONG (macro only) |
+| ≥ 18 | 🟡 MODERATE (macro only) |
+| < 18 | ⚪ WEAK (macro only) |
+
+**Carry the "(macro only)" label into every line of the output.** A STRONG that was never
+checked against the portfolio must not read like one that was.
 
 ### Actionability Flag
 
@@ -151,6 +171,11 @@ For each item rated A or B, add one of:
 
 Present only **Top 3–7 items** (rating A or B). Drop D items entirely.
 Include C items only if fewer than 3 items score A/B.
+
+**Exception, and it overrides the drop rule:** if *every* item scores D, report the week
+as low signal and list the top 3 anyway, marked as such. Returning nothing hides the
+difference between "no news" and "no signal in this news", and those are not the same
+finding.
 
 Use this format for each item:
 

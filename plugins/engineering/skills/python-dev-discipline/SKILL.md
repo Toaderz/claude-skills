@@ -86,6 +86,10 @@ Design functions to be **conceptual and easy to use**: the caller should underst
 what a function does from its name and signature alone, without reading the body.
 All complexity stays internal. Public APIs should be minimal and intuitive.
 
+This is the deep-module principle at function scale. **At module scale it belongs to
+`deep-module-architecture`**, which ships in this same plugin — go there when the question
+is which modules to merge, not how to shape one function.
+
 ```python
 # Good: caller understands intent immediately
 tablas = detectar_tablas(hoja)
@@ -120,13 +124,20 @@ If the change would touch **3+ modules**, pause:
 
 Before proposing a solution for anything non-trivial, **research current best practices**.
 
-- Use web search to find modern approaches, maintained libraries, benchmarks
-- Compare 2-3 options when the decision affects architecture or performance
-- Present findings concisely with trade-offs
-- If the user's approach is suboptimal, say so directly with the better alternative
-- If research confirms the user's approach is solid, say so too
+**Do not improvise this step when the tools for it exist.** If `deep-research` is
+available, use it — it carries source tiers, a stopping criterion, and the separation of
+evidence from interpretation that an ad-hoc search does not. If the decision is a choice
+between libraries or approaches, use `decision-comparison`, which states its criteria
+before the verdict and names what it could not establish.
 
-Skip research for simple, obvious tasks (sorting, file I/O, basic string operations).
+Both ship in the `research` plugin, which is **not** installed by default. When it is
+absent, the compact version is: find modern approaches and maintained libraries; compare
+two or three options when the decision affects architecture or performance; say which
+claims you verified and which you are assuming; and say plainly if the user's approach is
+solid, or if it is not and what beats it.
+
+Skip research entirely for simple, obvious tasks — sorting, file I/O, basic string
+operations. Researching those is the depth creep this step is not for.
 
 ### Step 4 · Code
 

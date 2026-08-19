@@ -34,6 +34,27 @@ sin componente visual.
 
 ---
 
+## Relación con otras capacidades
+
+Añadido en la migración a este repo; el resto del cuerpo viene tal cual del original.
+
+- **`artifact-design` (built-in) para un artefacto suelto.** Un póster, una página
+  autónoma o un mockup que no vive en un codebase son suyos. Esta skill es para un sitio
+  o componente **dentro de un proyecto**, con su design system y sus convenciones.
+- **`dataviz` (built-in) para gráficas y dashboards.** No las rediseñes aquí.
+- **`ui-ux-review` para revisar lo que ya existe.** Esta skill construye y mejora;
+  aquella audita accesibilidad, jerarquía y comportamiento en anchos chicos.
+- **El paso "usa una skill de diseño encima del default"** más abajo se resuelve con
+  `artifact-design`. No instales otra ni la reimplementes.
+
+**Precedencia con `preflight-planning`.** Si ya hubo un preflight, sus respuestas valen:
+no repitas preguntas ya contestadas. El protocolo de siete preguntas de abajo **no bloquea
+todo el trabajo** — bloquea solo lo que no se puede decidir sin la respuesta. Si falta algo
+no crítico, elige el default obvio, dilo, y sigue. Preguntar siete cosas antes de mover un
+dedo, cuando el planeador ya acordó el alcance, es fricción, no rigor.
+
+---
+
 ## Principios de Oro (los 3 autores coinciden — obligatorios)
 
 1. **Parte de referencias visuales, nunca de cero conceptual.**

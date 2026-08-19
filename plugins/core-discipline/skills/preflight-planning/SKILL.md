@@ -224,7 +224,10 @@ When the work is done, hand off to:
   discovered, or an approach failed for an instructive reason. Only durable, reusable
   knowledge. Not a transcript.
 - **`postflight-audit`** — if the change carries real risk. Audit depth scales with
-  that risk; a small change does not need a full review.
+  that risk; a small change does not need a full review. It ships in the `quality`
+  plugin, which is not always installed: **if it is not there, do the audit inline
+  rather than skipping it** — state the depth the risk deserves, run the project's own
+  checks, name what you could not verify, and look for a reason not to approve.
 
 ---
 

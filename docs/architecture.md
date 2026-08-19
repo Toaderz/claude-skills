@@ -31,7 +31,7 @@ GitHub repo  →  marketplace  →  plugins  →  projects
 
 ```bash
 claude plugin marketplace add Toaderz/claude-skills
-claude plugin install core-discipline@claude-skills --scope user
+claude plugin install core-discipline@ai-engineering-os --scope user
 ```
 
 **The repository is the single source of truth.** The same capability must not also live as a
@@ -58,7 +58,8 @@ claude-skills/
 │   ├── engineering/                    # PROJECT scope
 │   ├── architecture/                   # PROJECT scope
 │   ├── frontend/                       # PROJECT scope
-│   └── research/                       # PROJECT scope
+│   ├── research/                       # PROJECT scope — domain-neutral
+│   └── finance/                        # PROJECT scope — domain-specific by design
 ├── integrations/                       # how to reach tools we deliberately did not wrap
 ├── registry/                           # human inventory — never loaded at runtime
 ├── docs/
@@ -127,6 +128,7 @@ Everything else starts at PROJECT scope and earns promotion by measurement.
 | `postflight-audit` | quality | PROJECT | promoted only if the measured core stays within target |
 | `icm-architect` | architecture | PROJECT | not universal; promoted only if trimmed and the core stays within target |
 | engineering / frontend / research skills | respective | PROJECT | domain-specific by nature |
+| `news-prioritization` | finance | PROJECT | **never promoted.** It scores news against a tracked investment universe; in a project that does not follow markets it is pure ambient cost with a routing rival attached. It is also the one capability coupled to user data, which is why the universe file is read from the project and not bundled |
 
 ### The context target
 

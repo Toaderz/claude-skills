@@ -112,7 +112,7 @@ Run against the real CLI (2.1.235). Free, local, reproducible.
 | Marketplace listed | `claude plugin marketplace list` | ✅ resolves as `Source: Directory` at the repo root |
 | Plugin installs | `claude plugin install core-discipline@ai-engineering-os --scope local` | ✅ scope `local` |
 | Plugin enabled | `claude plugin list` | ✅ `0.1.0`, enabled |
-| Components enumerate | `claude plugin details core-discipline` | ✅ 3 skills, 1 agent, 0 hooks, 0 MCP, 0 LSP |
+| Components enumerate | `claude plugin details core-discipline` | ✅ 3 skills, 1 agent, 0 hooks, 0 MCP, 0 LSP — the CLI counts the `/preflight` command among skills, so "3" is 2 skills + 1 command |
 | Manifests valid | `claude plugin validate ./` and `--strict` per plugin | ✅ both pass |
 | Repo lint | `scripts/validate.sh` | ✅ 0 errors, 0 warnings |
 
@@ -261,13 +261,35 @@ routing question, and it falls under §4.
 project's cost policy forbids operations that create additional billing. The cases are
 therefore **written and committed but never executed here**.
 
-### The cases
+### The cases, and where they had to move
 
-Twelve scenarios in [`../plugins/core-discipline/evals/`](../plugins/core-discipline/evals/),
-each a directory with `prompt.md` and one grader per assertion. Five are negative
-assertions. `01-trivial` is the most important: a library that fires on everything has
-perfect recall and useless precision, and that failure is invisible unless tested for
-directly.
+Thirteen scenarios, each a directory with `prompt.md` and one grader per assertion. Five
+are negative assertions. `01-trivial` is the most important: a library that fires on
+everything has perfect recall and useless precision, and that failure is invisible unless
+tested for directly.
+
+**They were all in `core-discipline/evals/` and that was a defect.** Under
+`--ablation with-without`, the *with* and *without* arms differ only by the plugin being
+evaluated. Nine cases asserted that skills from `engineering`, `architecture`, `frontend`
+and `research` fired — those skills' behaviour is identical in both arms, so a `with-only`
+grader would have produced **no signal while looking like a passing test**. Spending money
+on that suite would not have answered the routing question.
+
+Each case now lives with the plugin whose skills it tests, which is also what
+`capability-policy.md` said to do all along:
+
+| Plugin | Cases |
+|---|---|
+| `core-discipline` | `01-trivial`, `02-web-api`, `03-document`, `04-email`, `05-video`, `06-multi-agent` |
+| `quality` | `01-completion-gate` — newly written; `quality` had no cases at all |
+| `engineering` | `01-python`, `02-architecture-audit` |
+| `architecture` | `01-large-project` |
+| `frontend` | `01-ui` |
+| `research` | `01-research`, `02-comparison` |
+
+Each plugin is evaluated separately. One grader remains deliberately cross-plugin —
+`engineering/evals/02-architecture-audit` asserts that `icm-architect` does *not* fire —
+and is only meaningful with both plugins installed.
 
 | Case | Expected skills | Expected agents | Actual skills | Actual agents | Result |
 |---|---|---|---|---|---|
@@ -324,7 +346,7 @@ Stage A is complete when every free check passes. Status as of commit 5:
 |---|---|
 | Marketplace resolves | ✅ |
 | Plugin installs | ✅ |
-| Skills, agents, commands enumerate | ✅ 3 skills, 1 agent |
+| Skills, agents, commands enumerate | ✅ as the CLI counts them: 3 skills (2 + the `/preflight` command), 1 agent |
 | Scope behaves | ✅ verified at `local` |
 | `claude plugin validate --strict` green | ✅ |
 | 0 broken links | ✅ |
@@ -338,9 +360,7 @@ reason recorded rather than the number massaged.
 
 ### Not yet verified
 
-- **`scripts/init-project.sh`** does not exist yet. It has nothing to install until
-  the domain plugins are built, so the cold-project and idempotency test moves to
-  Stage B.
+- **Semantic routing.** Still the one thing no local check reaches. See §4.
 - **Double-loading against account-synced skills.** Five files in this repo are still
   byte-identical to skills synced on the account (`audit-2026-08.md` §4.1). Until
   those account copies are retired through the claude.ai UI, the savings from this

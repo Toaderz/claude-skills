@@ -44,9 +44,16 @@ USAGE
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --only) EXPLICIT="${2:-}"; [ -n "$EXPLICIT" ] || die "--only needs a plugin list"; shift 2 ;;
+    --only)
+      [ $# -ge 2 ] && [ -n "${2:-}" ] || die "--only needs a plugin list"
+      EXPLICIT="$2"; shift 2 ;;
     --all) EXPLICIT="core-discipline,quality,engineering,architecture,frontend,research,finance"; shift ;;
-    --scope) SCOPE="${2:-}"; shift 2 ;;
+    --scope)
+      # Check for the operand BEFORE shifting. `shift 2` with one argument left is an
+      # error that shifts nothing, and with no `set -e` the loop re-enters on the same
+      # argument forever — `init-project.sh --scope` hung silently.
+      [ $# -ge 2 ] && [ -n "${2:-}" ] || die "--scope needs a value: user, project, or local"
+      SCOPE="$2"; shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
     -y|--yes) ASSUME_YES=1; shift ;;
     -h|--help) usage; exit 0 ;;

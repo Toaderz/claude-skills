@@ -73,6 +73,15 @@ if [ "$HAVE_CLAUDE" -eq 1 ]; then
   fi
 fi
 
+# --------------------------------------------------------------- generated files
+
+step "Generated files in sync"
+if python3 "$REPO/scripts/lib/gen_registry.py" --check; then
+  ok "registry/REGISTRY.md matches registry.json"
+else
+  FAILED=1
+fi
+
 # --------------------------------------------------------------- repo lint
 
 step "Repository lint"
