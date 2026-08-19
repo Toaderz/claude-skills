@@ -204,6 +204,51 @@ fired, then reverted:
 | Registry points at a moved path, or names a renamed skill | 3 errors, non-zero exit |
 | Two capability files with identical content | 1 duplicate error |
 
+## 3b. Cold-project installation — tested
+
+`scripts/init-project.sh`, run against throwaway directories. Free, local, repeatable.
+
+| Case | Expected | Result |
+|---|---|---|
+| `--dry-run` on an empty project | prints the plan, writes nothing | ✅ directory still empty afterwards |
+| Empty project | `core-discipline` + `quality` only | ✅ |
+| `pyproject.toml` present | + `engineering` | ✅ |
+| `package.json` present | + `frontend` | ✅ |
+| `pyproject.toml` + `src/App.tsx` | + both | ✅ |
+| First real run | installs, writes `.claude/settings.json` | ✅ 2 installed |
+| **Second identical run** | **changes nothing** | ✅ md5 identical, reports 0 installed / 2 already present |
+| Pre-existing unrelated `settings.json` | warns, then merges | ✅ `permissions.allow` preserved verbatim |
+| `--only <unknown-plugin>` | clear error, non-zero exit | ✅ exit 1, lists valid names |
+| `--scope <invalid>` | clear error before any change | ✅ exit 1 |
+| Non-existent target directory | clear error | ✅ exit 1 |
+| Unknown option | clear error | ✅ exit 1 |
+
+`research`, `architecture`, and `finance` are deliberately **not** auto-detected. Nothing
+on disk indicates that a project does research or follows markets, and guessing installs
+ambient cost the project may never use. They are opt-in via `--only`.
+
+### The defect this test found
+
+The first idempotency run **passed on outcome and failed on honesty**: `settings.json` was
+byte-identical across runs, but the script reported *"installed: core-discipline, quality,
+engineering"* the second time — it had installed nothing.
+
+The cause was reading `claude plugin list` and matching plugin names against its output.
+That output formats entries as `> name@marketplace`, so the pattern never matched and
+every plugin looked absent. Installation detection now reads the settings file for the
+requested scope, which is what actually records the state.
+
+**A script that reports work it did not do is the same class of failure as a validator
+that reports a check it did not run.** The outcome being safe is not the standard.
+
+### What this does not establish
+
+The install test proves the capabilities are **installed and enumerable** in a cold
+project. It does not prove a cold Claude will **choose** the right one — that is the
+routing question, and it falls under §4.
+
+---
+
 ## 4. Semantic routing — NOT MEASURED
 
 > **Automatic routing is architecturally configured and locally validated, but semantic

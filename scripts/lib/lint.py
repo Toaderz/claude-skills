@@ -201,7 +201,7 @@ def check_links(md_files: list[Path]) -> None:
                 unresolved_mentions += 1
     if unresolved_mentions:
         note(
-            f"{unresolved_mentions} inline-code path mention(s) under plugins/ do not resolve. "
+            f"{unresolved_mentions} inline-code path mention(s) across the repo do not resolve. "
             "These are not failed: prose paths usually describe structure to produce, not files "
             "that ship. Review them if a skill claims to read one."
         )
@@ -406,17 +406,28 @@ def main() -> int:
     agent_files = sorted(PLUGINS.glob("*/agents/*.md"))
     md_files = sorted(PLUGINS.rglob("*.md"))
 
+    # Link checking covers the WHOLE repository, not just plugins/. Restricting it to
+    # plugins/ left the root CLAUDE.md, README, docs/ and integrations/ unchecked — and
+    # that is precisely where a link rots, because deleting a capability directory does
+    # not touch the documents that point at it. The cleanup commit left six dead paths
+    # in CLAUDE.md and this checker reported a clean run.
+    all_md = sorted(
+        f
+        for f in REPO.rglob("*.md")
+        if ".git" not in f.parts and "node_modules" not in f.parts
+    )
+
     skills = [s for s in (check_skill(f) for f in skill_files) if s]
     for f in agent_files:
         check_agent(f)
 
-    check_links(md_files)
+    check_links(all_md)
     check_duplicates(md_files)
     check_registry(skills)
     check_trigger_coverage(skills)
     check_unmigrated()
 
-    print(f"\n  {len(skills)} skill(s), {len(agent_files)} agent(s) linted")
+    print(f"\n  {len(skills)} skill(s), {len(agent_files)} agent(s), {len(all_md)} markdown file(s) linted")
 
     for label, items in (("NOTE", notes), ("WARN", warnings), ("ERROR", errors)):
         for item in items:

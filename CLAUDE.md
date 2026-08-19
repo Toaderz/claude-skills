@@ -1,45 +1,47 @@
-# Claude Skills Configuration
+# AI Engineering OS
 
-## Skills globales — leer en TODA tarea, sin excepción
+This repository **is** a Claude Code plugin marketplace. It ships engineering-discipline
+capabilities that install into other projects.
 
-Estas tres skills corren siempre en segundo plano. Léelas al inicio de cada conversación.
+Working *on* this repo? Read [`docs/architecture.md`](docs/architecture.md) first.
 
-- `Claude_optimization/memory.md` — recupera memoria relevante antes de empezar, captura aprendizajes al terminar
-- `Claude_optimization/pattern-learning.md` — detecta patrones buenos y malos durante la ejecución
-- `Claude_optimization/execution-planning.md` — planifica antes de ejecutar tareas no triviales
+## Layout
 
-**Operación:** silenciosa. No narrar la maquinaria al usuario.
+| Path | What |
+|---|---|
+| `.claude-plugin/marketplace.json` | the marketplace manifest — 7 plugins |
+| `plugins/<name>/` | one plugin: `skills/`, `agents/`, `commands/`, `evals/` |
+| `registry/` | human inventory of every capability. **Not a router** |
+| `docs/` | architecture, capability policy, audit, measurements |
+| `scripts/` | `validate.sh`, `measure.sh`, `init-project.sh` |
 
----
+## What lives where
 
-## Arquitectura por defecto de proyectos nuevos — ICM
+`core-discipline` planning and project memory · `quality` completion gate ·
+`engineering` Python and module architecture · `architecture` ICM workspaces ·
+`frontend` UI review and web design · `research` research and decisions ·
+`finance` market news triage.
 
-**Cuándo:** SIEMPRE que se inicie un proyecto, repositorio, o carpeta de trabajo nueva — en este repo o en cualquier otro repo/proyecto que trabajemos — o que se vaya a reestructurar una carpeta existente sin organización clara. No hace falta que el usuario lo pida.
+**Routing is not configured here.** Claude Code matches on each skill's own
+`description`; this file does not tell anyone which skill to read. If a skill fires when
+it should not — or fails to fire — fix its description, not this file. See
+`docs/routing-tests.md` §4 for the diagnosis order.
 
-**Skill:** `icm-architect/SKILL.md` (con `references/` y `assets/templates/`)
+## Rules for changing this repo
 
-**Qué es:** Interpretable Context Methodology (ICM, Van Clief & McDermott) — usa la estructura de carpetas como arquitectura del agente: carpetas numeradas para secuencia, jerarquía para alcance de contexto, archivos markdown planos para estado. Reemplaza orquestación por código con convenciones de carpetas + un `CLAUDE.md`/`CONTEXT.md` de entrada.
+1. **Do not duplicate what Claude Code already does.** Pass the gate in
+   [`docs/adding-capabilities.md`](docs/adding-capabilities.md) before adding anything,
+   and state in the PR which built-in you considered and why it does not cover the case.
+2. **`scripts/validate.sh` must be green** before every commit: 0 errors, 0 warnings.
+3. **Measure before adding to `core-discipline`.** Its cost is paid in every session
+   forever. `scripts/measure.sh` gives the real number.
+4. **Zero additional monetary cost.** No `claude plugin eval`, no paid graders, no paid
+   APIs. A test that would cost money is written and reported as
+   `not executed — cost prohibited`.
+5. **This repository is public.** No personal data, credentials, or holdings in the tree.
 
-**Acción por defecto:**
-1. Al arrancar un proyecto nuevo o describir un flujo de trabajo repetible, aplicar el modo Build de `icm-architect` (elegir una de las seis formas: pipeline, umbrella, record library, knowledge bundle, context map, system map) sin preguntar si se debe usar ICM.
-2. Al entrar a un repo/carpeta existente sin estructura clara, ofrecer o aplicar el modo Restructure (con el gate humano de "proponer antes de mover" que exige la skill).
-3. Excepción: tareas realmente puntuales, de un solo uso, no repetibles — ahí no forzar una estructura de carpetas; decirlo brevemente en vez de escalar.
-4. Esta skill convive con `project-structure-governor` (organización general del repo) y con `find-skills`/`workflow-orchestrator` como bootstrap base — ICM es el método concreto para el paso "crear o refinar la estructura".
+## Working in a project that installed these
 
----
-
-## Skills específicas — leer SOLO cuando aplica
-
-### Python / código complejo
-**Cuándo:** el usuario pide fix, feature, refactor, nuevo módulo, o cualquier cambio que toque más de una función  
-**Skill:** `Improve code/develope_code.md`
-
-### Arquitectura de codebase
-**Cuándo:** el usuario quiere mejorar estructura, reducir acoplamiento, hacer el código más testeable, o pide un "refactor grande"  
-**Skills:** `Improve code/SKILL.md` + `Improve code/REFERENCE.md`
-
----
-
-## Regla de oro
-
-> Globales siempre. ICM por defecto en todo proyecto nuevo, sin preguntar. Específicas solo cuando el trigger aplica. Nunca narrar cuál skill se está leyendo a menos que el usuario lo pregunte.
+Nothing to configure. The plugins are installed, their descriptions are loaded, and
+Claude Code routes to them. `scripts/init-project.sh` installs the right ones for a
+project; `--dry-run` shows what it would do first.
