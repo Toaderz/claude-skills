@@ -370,6 +370,180 @@
       "status": "active",
       "since": "0.1.0",
       "notes": "Moved to its own finance plugin rather than research, so the generic research plugin stays installable anywhere. The '## Assets (Exact Match)' contract was broken — no such heading exists — and now matches the real sector-heading structure. The universe itself is personal holdings and is NOT bundled: this repository is public, so the plugin ships only a format example and reads the real file from the project. The skill states the gap explicitly when no universe is found instead of scoring portfolio relevance without one."
+    },
+    {
+      "name": "postflight-audit",
+      "type": "skill",
+      "plugin": "quality",
+      "path": "plugins/quality/skills/postflight-audit/SKILL.md",
+      "purpose": "Verify finished work before it is called done, at a depth proportional to what the change can break, actively looking for reasons not to approve.",
+      "triggers": {
+        "en": [
+          "is this ready",
+          "done?",
+          "ship it",
+          "before the PR",
+          "before deploy",
+          "audit this"
+        ],
+        "es": [
+          "ya quedó",
+          "revisa antes de cerrar",
+          "listo para producción",
+          "ya está?"
+        ]
+      },
+      "excludes": [
+        "trivial edits",
+        "work still in progress",
+        "line-by-line code review (built-in /code-review)"
+      ],
+      "dependencies": [
+        "critical-reviewer (core-discipline, full depth only)",
+        "/security-review (built-in)"
+      ],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [
+        "workflow-orchestrator/SKILL.md §7 final cold verification"
+      ],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Kept out of core-discipline: it is not universal, and the core is already 40 tokens over its target. Promotion to USER scope is a measurement decision, recorded in docs/routing-tests.md."
+    },
+    {
+      "name": "postflight",
+      "type": "command",
+      "plugin": "quality",
+      "path": "plugins/quality/commands/postflight.md",
+      "purpose": "Explicit entry point for postflight-audit, with the audit shown rather than applied.",
+      "triggers": {
+        "en": [
+          "/postflight"
+        ],
+        "es": [
+          "/postflight"
+        ]
+      },
+      "excludes": [],
+      "dependencies": [
+        "postflight-audit"
+      ],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "~40 tok ambient",
+      "replaces": [],
+      "status": "active",
+      "since": "0.1.0"
+    },
+    {
+      "name": "deep-research",
+      "type": "skill",
+      "plugin": "research",
+      "path": "plugins/research/skills/deep-research/SKILL.md",
+      "purpose": "Research to a chosen depth with an explicit stopping criterion, ranked source tiers, triangulation of load-bearing claims, and evidence kept separate from interpretation.",
+      "triggers": {
+        "en": [
+          "research",
+          "investigate",
+          "find out",
+          "verify",
+          "fact-check",
+          "how solid is this claim"
+        ],
+        "es": [
+          "investiga",
+          "averigua",
+          "qué se sabe de",
+          "es cierto que",
+          "busca fuentes"
+        ]
+      },
+      "excludes": [
+        "a single lookup one search answers",
+        "questions about this codebase",
+        "opinions with no evidence to find"
+      ],
+      "dependencies": [],
+      "required_tools": [
+        "WebSearch",
+        "WebFetch"
+      ],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [],
+      "status": "active",
+      "since": "0.1.0"
+    },
+    {
+      "name": "decision-comparison",
+      "type": "skill",
+      "plugin": "research",
+      "path": "plugins/research/skills/decision-comparison/SKILL.md",
+      "purpose": "Compare options against criteria stated before the verdict, mark evidence by how it is known, name the missing data, and recommend or decline to.",
+      "triggers": {
+        "en": [
+          "which should I use",
+          "compare",
+          "is X better than Y",
+          "pros and cons",
+          "help me decide"
+        ],
+        "es": [
+          "cuál conviene",
+          "cuál me recomiendas",
+          "compara",
+          "vale la pena"
+        ]
+      },
+      "excludes": [
+        "only one option exists",
+        "the choice is already made",
+        "factual lookup with no decision attached"
+      ],
+      "dependencies": [],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Description anchors on the SHAPE of the request (compare options and recommend), not on a domain, so it serves APIs, architecture, vendors, or hotels without becoming so broad it stops discriminating."
+    },
+    {
+      "name": "ui-ux-review",
+      "type": "skill",
+      "plugin": "frontend",
+      "path": "plugins/frontend/skills/ui-ux-review/SKILL.md",
+      "purpose": "Review an interface for what breaks real users: keyboard and screen-reader access, contrast, hierarchy, narrow widths, component structure, and design-system consistency.",
+      "triggers": {
+        "en": [
+          "review this component",
+          "a11y check",
+          "accessibility",
+          "responsive issues",
+          "this looks off"
+        ],
+        "es": [
+          "revisa esta interfaz",
+          "está accesible",
+          "se ve mal en móvil"
+        ]
+      },
+      "excludes": [
+        "building a site from scratch (diseno-web-estrategico)",
+        "charts and dashboards (built-in dataviz)",
+        "backend work with no rendered surface"
+      ],
+      "dependencies": [],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Shipped WITHOUT a paths: filter despite the plan calling for one. Issue #49835 can make a paths-scoped skill undiscoverable, and with runtime routing evaluation cost-prohibited there is no way to detect that failure here. The description routes it; paths: is one line to add if wanted."
     }
   ],
   "deferred": [

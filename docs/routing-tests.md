@@ -27,25 +27,51 @@ computation and costs nothing.
 The CLI labels these projections and notes they may differ from actual usage. Reported
 as returned, unadjusted.
 
-### Domain plugins @ 0.1.0 — measured after the migration
+### Domain plugins @ 0.1.0 — measured
 
-Measured the same way, with each plugin installed at `local` scope. These are **PROJECT
-scope**: none of them is resident unless a project installs it.
+Measured the same way, each installed at `local` scope. All are **PROJECT scope**: none
+is resident unless a project installs it.
 
-| Plugin | Always-on | Components |
+| Plugin | Always-on | Components (always-on / on-invoke) |
 |---|---:|---|
-| `engineering` | **~478 tok** | `python-dev-discipline` ~240 (~2.1k on-invoke) · `deep-module-architecture` ~240 (~1.4k) |
-| `architecture` | **~293 tok** | `icm-architect` ~290 (~3.5k) |
-| `frontend` | **~265 tok** | `diseno-web-estrategico` ~270 (~3.1k) |
-| `finance` | **~233 tok** | `news-prioritization` ~230 (~2.3k) |
+| `quality` | **~246 tok** | `postflight-audit` ~210 / ~1.4k · `/postflight` ~30 / ~520 |
+| `engineering` | **~478 tok** | `python-dev-discipline` ~240 / ~2.1k · `deep-module-architecture` ~240 / ~1.4k |
+| `frontend` | **~481 tok** | `diseno-web-estrategico` ~250 / ~2.9k · `ui-ux-review` ~240 / ~1.6k |
+| `research` | **~426 tok** | `deep-research` ~200 / ~1.3k · `decision-comparison` ~220 / ~1.2k |
+| `architecture` | **~293 tok** | `icm-architect` ~290 / ~3.5k |
+| `finance` | **~233 tok** | `news-prioritization` ~230 / ~2.4k |
 
-**Everything installed at user scope would cost ~1,909 ambient tokens** — three times the
-core alone. That number is the whole argument for scoping by project: a repository with no
-Python, no UI, and no market exposure pays 640, not 1,909.
+**Everything at user scope would cost ~2,797 ambient tokens** — more than four times the
+core alone. That figure is the entire argument for scoping by project: a repository with
+no Python, no UI, and no market exposure pays 640, not 2,797.
 
-`icm-architect` at ~290 is the single most expensive description in the library, which is
-why it stays in `architecture` at PROJECT scope rather than being promoted. The audit
-predicted ~300 for it; the measurement confirms it.
+`icm-architect` at ~290 is the most expensive single description in the library, which is
+why it stays at PROJECT scope rather than being promoted. The audit predicted ~300 for
+it; the measurement confirms it.
+
+### The `quality` promotion decision — decided by the number
+
+The plan left this open deliberately: build `postflight-audit` in its own plugin, measure,
+then decide whether it is promoted to USER scope.
+
+**Measured: `quality` is ~246 ambient tokens. Core + quality = ~886 against a ~600
+target — 48% over.**
+
+**It is not promoted.** The core is already 40 tokens over target with a documented
+reason; taking it to 886 would not be an overshoot, it would be a different budget quietly
+adopted. `postflight-audit` is close to universal in *usefulness*, but universality is not
+the test — cost against the ambient budget is, and that is what the measurement decides.
+
+The practical cost of this call is close to zero: `scripts/init-project.sh` installs
+`quality` in every project by default, so it is present wherever work gets finished.
+Anyone who wants it resident everywhere can promote it in one command:
+
+```bash
+claude plugin install quality@ai-engineering-os --scope user
+```
+
+That is a choice worth **+246 ambient tokens in every session, forever**, and it should be
+made with the number visible.
 
 ### What happened when it came in over target
 
@@ -108,62 +134,75 @@ plugin and reports it as not found — expected, not a defect.
 
 ## 3. Static trigger-coverage matrix — a proxy, not proof
 
-From `scripts/validate.sh`. For each scenario it now reports **how many distinct scenario
+From `scripts/validate.sh`. For each scenario it reports **how many distinct scenario
 terms each description claims**, not merely which descriptions contain one.
 
 | Scenario | Matched (term count) | Verdict |
 |---|---|---|
-| `trivial` | *(none)* | ✅ **explicitly excluded** by `preflight-planning` |
-| `python` | python-dev-discipline **(5)**, icm-architect (1), preflight-planning (1), deep-module-architecture (1) | ✅ clean separation |
+| `trivial` | *(none)* | ✅ **excluded** by `preflight-planning`, `postflight-audit` |
+| `python` | python-dev-discipline **(5)**, icm-architect (1), preflight-planning (1), deep-module-architecture (1) | ✅ |
 | `web-api` | icm-architect (1), preflight-planning (1), diseno-web-estrategico (1) | ✅ nobody claims it strongly |
-| `research` | *(none)* | ⏳ `deep-research` not built yet |
-| `comparison` | *(none)* | ⏳ `decision-comparison` not built yet |
-| `ui` | diseno-web-estrategico (1) | ⏳ `ui-ux-review` not built yet |
-| `architecture-audit` | deep-module-architecture **(6)**, icm-architect (2), preflight-planning (1), python-dev-discipline (1) | ✅ clean separation |
+| `research` | deep-research **(5)** | ✅ |
+| `comparison` | decision-comparison **(4)** | ✅ |
+| `ui` | ui-ux-review **(5)**, diseno-web-estrategico (1) | ✅ |
+| `architecture-audit` | deep-module-architecture **(6)**, icm-architect (2), + four at (1) | ✅ |
 | `large-project` | icm-architect **(3)** | ✅ |
 | `document` | *(none)* | ✅ negative assertion holds |
 | `email` | *(none)* | ✅ negative assertion holds |
 | `video` | *(none)* | ✅ negative assertion holds |
-| `multi-agent` | preflight-planning (2), deep-module-architecture (2), news-prioritization (1), diseno-web-estrategico (1) | ⚠️ **tie — see below** |
+| `multi-agent` | preflight-planning **(2)**, postflight-audit (1), python-dev-discipline (1) | ✅ both expected skills present |
+
+**0 errors, 0 warnings. Every scenario is covered, and every expected skill wins its own
+scenario outright.**
 
 **This is a lexical proxy. It is not evidence that routing works.** The real matcher is
 semantic; this one counts words. It earns its place by catching two failures cheaply: a
 scenario no description covers (guaranteed recall failure) and a scenario several
 descriptions claim with equal strength (predictable precision failure).
 
-### The one open warning
+### Six defects this matrix found — in itself
 
-`multi-agent` is a tie at two terms: `preflight-planning` claims *plan* and *planifica*,
-`deep-module-architecture` claims *review* and *revisa*. Semantically these are not
-competing — the second only ever says "architecture review" and "revisa la arquitectura" —
-but the proxy scores unigrams, so a bigram whose first word is generic reads as a claim.
-
-**The warning is left standing rather than tuned away.** Removing "architecture review"
-from a description to silence a word-counter would trade real recall for a green line.
-
-### Four defects this matrix has now found in itself
-
-Every one was fixed in the tool, not papered over:
+Every one was fixed in the tool, never papered over. **Five of the six made the tool
+report the opposite of the truth**, which is worse than reporting nothing.
 
 1. `trivial` matched inside *non-trivial*. Matching is now word-bounded.
-2. Terms occurring in a skill's **do NOT use** clause counted as claims. The matcher now
-   splits each description at its exclusion clause; terms found there mean the skill
-   disclaims the scenario, and are reported as such.
+2. Terms in a skill's **do NOT use** clause counted as claims. The matcher now splits
+   each description at its exclusion clause; terms found there mean the skill disclaims
+   the scenario, and are reported as such.
 3. **Membership was scored as competition.** A skill matching one generic verb
    (*refactor*) ranked equal to one matching six, so `python` and `architecture-audit`
-   were flagged as precision failures when they are in fact clean 5-to-1 and 6-to-2
-   separations. Scoring is now by distinct terms matched, and a rival must claim at least
-   two before the tool calls it a risk.
-4. **The exclusion clause was missed in Spanish.** `NO la uses para bugs de backend` did
-   not match a pattern written as `no uses`, because Spanish puts a clitic between them —
-   and the clause was also wrapped mid-phrase by the YAML folded scalar. Every term the
-   skill explicitly disclaimed was being counted as a positive claim, which is exactly
-   backwards. Descriptions are now whitespace-normalised before splitting, and the
-   pattern covers the clitic forms.
+   were flagged as precision failures when they are clean 5-to-1 and 6-to-2 separations.
+   Scoring is now by distinct terms matched, and a rival needs at least two before the
+   tool calls it a risk.
+4. **The exclusion clause was invisible in Spanish.** `NO la uses para bugs de backend`
+   never matched a pattern written as `no uses`, because Spanish puts a clitic between
+   them. Every term the skill explicitly disclaimed counted as a positive claim.
+5. **The same clause was also wrapped mid-phrase by the YAML folded scalar**, so even the
+   English patterns missed it whenever the line broke in the wrong place. Descriptions are
+   now whitespace-normalised before splitting.
+6. **A scenario could only expect one skill.** `12-multi-agent` reads *"Plan it out, then
+   check the work when it's done"* — two requests in one sentence, correctly answered by
+   two skills. The schema forced one, so the second was reported as competition. `expect`
+   now accepts a list. The same scenario's `terms` also listed *review* and *audit*, which
+   appear nowhere in its prompt and are common vocabulary across the library — generic
+   terms manufacturing a warning out of nothing. Terms now come from the prompt.
 
-Defect 4 is the one worth remembering: **a validator that silently inverts its own signal
-is worse than no validator**, and it only surfaced because a Spanish-language skill was
-migrated into a checker whose patterns had been written against English ones.
+Defects 4 and 5 are the ones worth remembering: **a validator that silently inverts its
+own signal is worse than no validator**, and they only surfaced because a Spanish-language
+skill met a checker whose patterns had been written against English ones.
+
+### The matrix is verified non-vacuous
+
+A checker that always passes is decoration. Both failure branches were forced and both
+fired, then reverted:
+
+| Injected fault | Result |
+|---|---|
+| Scenario expects a skill that does not exist | `GAP`, reported as not-yet-built |
+| Scenario expects a skill whose description contains none of its terms | `WARN` — likely recall failure |
+| A rival matches more strongly than the expected skill | `WARN` — precision risk |
+| Registry points at a moved path, or names a renamed skill | 3 errors, non-zero exit |
+| Two capability files with identical content | 1 duplicate error |
 
 ## 4. Semantic routing — NOT MEASURED
 
@@ -198,7 +237,7 @@ directly.
 | `09-document` | **none** (built-ins) | **0** | — | — | NOT EXECUTED |
 | `10-email` | **none** (connector) | **0** | — | — | NOT EXECUTED |
 | `11-video` | **none** — report missing `ffmpeg` | **0** | — | — | NOT EXECUTED |
-| `12-multi-agent` | preflight-planning | justified N | — | — | NOT EXECUTED |
+| `12-multi-agent` | preflight-planning + postflight-audit | justified N | — | — | NOT EXECUTED |
 
 ### To execute them
 

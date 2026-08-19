@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "research",
+  "version": "0.1.0",
+  "description": "Finding out and deciding: research with source tiers and an explicit stopping criterion, and option comparison that states its criteria and its missing data before recommending.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}

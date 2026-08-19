@@ -21,6 +21,19 @@
       ]
     },
     {
+      "name": "quality",
+      "source": "./plugins/quality",
+      "displayName": "Quality",
+      "description": "A gate before work is called done, at a depth proportional to what the change can break. Install per project; promote to user scope only if the ambient budget allows.",
+      "category": "workflow",
+      "tags": [
+        "review",
+        "testing",
+        "audit",
+        "quality"
+      ]
+    },
+    {
       "name": "engineering",
       "source": "./plugins/engineering",
       "displayName": "Engineering",
@@ -57,6 +70,19 @@
         "ux",
         "accessibility",
         "design"
+      ]
+    },
+    {
+      "name": "research",
+      "source": "./plugins/research",
+      "displayName": "Research",
+      "description": "Research with source tiers and a stopping criterion, and option comparison that states its criteria and its missing data before recommending. Domain-neutral.",
+      "category": "research",
+      "tags": [
+        "research",
+        "sources",
+        "comparison",
+        "decisions"
       ]
     },
     {

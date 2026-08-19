@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "quality",
+  "version": "0.1.0",
+  "description": "A quality gate that runs before work is called done, at a depth proportional to what the change can break. Ships the postflight-audit skill and the /postflight command.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}

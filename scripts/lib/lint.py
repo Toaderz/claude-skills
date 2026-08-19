@@ -322,7 +322,12 @@ def check_trigger_coverage(skills: list[dict]) -> None:
         score = {n: sum(hits(t, pos) for t in terms) for n, (pos, _) in split.items()}
         matched = sorted((n for n, k in score.items() if k), key=lambda n: -score[n])
         excluded = [n for n, (_, neg) in split.items() if any(hits(t, neg) for t in terms)]
-        expect = sc.get("expect", "")
+        # A scenario may legitimately want more than one skill: "plan it out, then
+        # check the work when it's done" is two requests in one sentence.
+        raw = sc.get("expect", "")
+        expects = [raw] if isinstance(raw, str) else list(raw)
+        expects = [e for e in expects if e and e != "none"]
+        expect = expects[0] if expects else ("none" if raw == "none" else "")
         shown = ", ".join(f"{n}({score[n]})" for n in matched) or "(none)"
 
         if expect == "none":
@@ -337,32 +342,30 @@ def check_trigger_coverage(skills: list[dict]) -> None:
                     f"scenario '{sc['id']}': explicitly excluded by "
                     f"{', '.join(excluded)} — the exclusion clause is doing its job"
                 )
-        elif expect and expect not in matched:
+        elif expects and any(e not in matched for e in expects):
             status = "GAP "
             available = {s["name"] for s in skills}
-            if expect in available:
-                warn(
-                    f"scenario '{sc['id']}': expected skill '{expect}' exists but its "
-                    "description does not contain any scenario term — likely recall failure"
-                )
-            else:
-                note(f"scenario '{sc['id']}': expected skill '{expect}' not built yet")
+            for e in (e for e in expects if e not in matched):
+                if e in available:
+                    warn(
+                        f"scenario '{sc['id']}': expected skill '{e}' exists but its "
+                        "description does not contain any scenario term — likely recall failure"
+                    )
+                else:
+                    note(f"scenario '{sc['id']}': expected skill '{e}' not built yet")
         else:
             # Precision risk is a rival claiming the scenario at least as strongly as
             # the skill that is supposed to own it — not merely a rival existing.
             # One shared generic verb ("build", "review") is noise, not competition:
             # a rival needs at least two scenario terms before this proxy claims
             # anything. Every rival is still printed, whatever its score.
-            rivals = [
-                n
-                for n in matched
-                if n != expect and score[n] >= max(2, score.get(expect, 0))
-            ]
+            floor = max(2, min((score.get(e, 0) for e in expects), default=0))
+            rivals = [n for n in matched if n not in expects and score[n] >= floor]
             if rivals:
                 status = "WARN"
                 warn(
                     f"scenario '{sc['id']}': {', '.join(rivals)} match as strongly as "
-                    f"'{expect}' ({score.get(expect, 0)} term(s)) — precision risk"
+                    f"{' + '.join(expects)} — precision risk"
                 )
             else:
                 status = "ok  "
