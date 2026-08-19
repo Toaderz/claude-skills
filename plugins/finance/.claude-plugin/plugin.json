@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "finance",
+  "version": "0.1.0",
+  "description": "Macro-financial news triage scored against a tracked investment universe. Install only in projects that follow markets — it is domain-specific by design.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}

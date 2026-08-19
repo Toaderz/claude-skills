@@ -27,6 +27,26 @@ computation and costs nothing.
 The CLI labels these projections and notes they may differ from actual usage. Reported
 as returned, unadjusted.
 
+### Domain plugins @ 0.1.0 — measured after the migration
+
+Measured the same way, with each plugin installed at `local` scope. These are **PROJECT
+scope**: none of them is resident unless a project installs it.
+
+| Plugin | Always-on | Components |
+|---|---:|---|
+| `engineering` | **~478 tok** | `python-dev-discipline` ~240 (~2.1k on-invoke) · `deep-module-architecture` ~240 (~1.4k) |
+| `architecture` | **~293 tok** | `icm-architect` ~290 (~3.5k) |
+| `frontend` | **~265 tok** | `diseno-web-estrategico` ~270 (~3.1k) |
+| `finance` | **~233 tok** | `news-prioritization` ~230 (~2.3k) |
+
+**Everything installed at user scope would cost ~1,909 ambient tokens** — three times the
+core alone. That number is the whole argument for scoping by project: a repository with no
+Python, no UI, and no market exposure pays 640, not 1,909.
+
+`icm-architect` at ~290 is the single most expensive description in the library, which is
+why it stays in `architecture` at PROJECT scope rather than being promoted. The audit
+predicted ~300 for it; the measurement confirms it.
+
 ### What happened when it came in over target
 
 First measurement: **~795 tokens**, 33% over. Applying the procedure from
@@ -88,43 +108,62 @@ plugin and reports it as not found — expected, not a defect.
 
 ## 3. Static trigger-coverage matrix — a proxy, not proof
 
-From `scripts/validate.sh`. For each scenario, which skill descriptions contain its
-terms, matched with word boundaries and split at each description's exclusion clause.
+From `scripts/validate.sh`. For each scenario it now reports **how many distinct scenario
+terms each description claims**, not merely which descriptions contain one.
 
-| Scenario | Matched | Verdict |
+| Scenario | Matched (term count) | Verdict |
 |---|---|---|
 | `trivial` | *(none)* | ✅ **explicitly excluded** by `preflight-planning` |
-| `python` | preflight-planning | ⏳ `python-dev-discipline` not migrated yet |
-| `web-api` | preflight-planning | ✅ |
+| `python` | python-dev-discipline **(5)**, icm-architect (1), preflight-planning (1), deep-module-architecture (1) | ✅ clean separation |
+| `web-api` | icm-architect (1), preflight-planning (1), diseno-web-estrategico (1) | ✅ nobody claims it strongly |
 | `research` | *(none)* | ⏳ `deep-research` not built yet |
 | `comparison` | *(none)* | ⏳ `decision-comparison` not built yet |
-| `ui` | *(none)* | ⏳ `ui-ux-review` not built yet |
-| `architecture-audit` | preflight-planning | ⏳ `deep-module-architecture` not migrated yet |
-| `large-project` | *(none)* | ⏳ `icm-architect` not migrated yet |
+| `ui` | diseno-web-estrategico (1) | ⏳ `ui-ux-review` not built yet |
+| `architecture-audit` | deep-module-architecture **(6)**, icm-architect (2), preflight-planning (1), python-dev-discipline (1) | ✅ clean separation |
+| `large-project` | icm-architect **(3)** | ✅ |
 | `document` | *(none)* | ✅ negative assertion holds |
 | `email` | *(none)* | ✅ negative assertion holds |
 | `video` | *(none)* | ✅ negative assertion holds |
-| `multi-agent` | preflight-planning | ✅ |
+| `multi-agent` | preflight-planning (2), deep-module-architecture (2), news-prioritization (1), diseno-web-estrategico (1) | ⚠️ **tie — see below** |
 
 **This is a lexical proxy. It is not evidence that routing works.** The real matcher is
-semantic; this one counts words. It earns its place by catching two failures cheaply:
-a scenario no description covers (guaranteed recall failure) and a scenario many
-descriptions compete for (predictable precision failure).
+semantic; this one counts words. It earns its place by catching two failures cheaply: a
+scenario no description covers (guaranteed recall failure) and a scenario several
+descriptions claim with equal strength (predictable precision failure).
 
-It has already produced two false signals, both fixed in the tool rather than papered
-over:
+### The one open warning
 
-- `trivial` appeared to match `preflight-planning` because the term appeared inside
-  the phrase *non-trivial*. Matching is now word-bounded.
-- `trivial` appeared to match again because the terms occur in the skill's **do NOT
-  use** clause. The matcher now splits each description at its exclusion clause; terms
-  found there mean the skill disclaims the scenario, which is the opposite of
-  competing for it, and are reported as such.
+`multi-agent` is a tie at two terms: `preflight-planning` claims *plan* and *planifica*,
+`deep-module-architecture` claims *review* and *revisa*. Semantically these are not
+competing — the second only ever says "architecture review" and "revisa la arquitectura" —
+but the proxy scores unigrams, so a bigram whose first word is generic reads as a claim.
 
-The ⏳ rows are not failures. They are capabilities scheduled for Stage B, and the
-matrix will be re-run then.
+**The warning is left standing rather than tuned away.** Removing "architecture review"
+from a description to silence a word-counter would trade real recall for a green line.
 
----
+### Four defects this matrix has now found in itself
+
+Every one was fixed in the tool, not papered over:
+
+1. `trivial` matched inside *non-trivial*. Matching is now word-bounded.
+2. Terms occurring in a skill's **do NOT use** clause counted as claims. The matcher now
+   splits each description at its exclusion clause; terms found there mean the skill
+   disclaims the scenario, and are reported as such.
+3. **Membership was scored as competition.** A skill matching one generic verb
+   (*refactor*) ranked equal to one matching six, so `python` and `architecture-audit`
+   were flagged as precision failures when they are in fact clean 5-to-1 and 6-to-2
+   separations. Scoring is now by distinct terms matched, and a rival must claim at least
+   two before the tool calls it a risk.
+4. **The exclusion clause was missed in Spanish.** `NO la uses para bugs de backend` did
+   not match a pattern written as `no uses`, because Spanish puts a clitic between them —
+   and the clause was also wrapped mid-phrase by the YAML folded scalar. Every term the
+   skill explicitly disclaimed was being counted as a positive claim, which is exactly
+   backwards. Descriptions are now whitespace-normalised before splitting, and the
+   pattern covers the clitic forms.
+
+Defect 4 is the one worth remembering: **a validator that silently inverts its own signal
+is worse than no validator**, and it only surfaced because a Spanish-language skill was
+migrated into a checker whose patterns had been written against English ones.
 
 ## 4. Semantic routing — NOT MEASURED
 

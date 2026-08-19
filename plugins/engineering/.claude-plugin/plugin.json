@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "engineering",
+  "version": "0.1.0",
+  "description": "Discipline for writing and restructuring code: general fixes over hardcoded patches, root-cause tracing, and deepening shallow modules so they can be tested at the boundary.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}

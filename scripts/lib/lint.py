@@ -277,12 +277,24 @@ def check_registry(skills: list[dict]) -> None:
 # A description's "do NOT use" clause is what buys precision. Terms appearing there
 # mean the skill explicitly disclaims the scenario — the opposite of competing for it.
 NEGATIVE_CLAUSE_RE = re.compile(
-    r"\b(do not use|don't use|do not trigger|no uses|nunca uses|not for)\b", re.I
+    # Spanish puts a clitic between the negation and the verb ("NO la uses para..."),
+    # which a literal "no uses" misses — and missing it counts an excluded term as a
+    # positive claim, which is exactly backwards.
+    r"\b(do not use|don't use|do not trigger|never use|not for"
+    r"|no(?: l[ao]s?)? uses|nunca(?: l[ao]s?)? uses|no la actives|no actives)\b",
+    re.I,
 )
 
 
 def split_description(desc: str) -> tuple[str, str]:
-    """Return (positive claim, exclusion clause) of a skill description."""
+    """Return (positive claim, exclusion clause) of a skill description.
+
+    Line breaks inside a YAML folded scalar are arbitrary wrapping, so they are
+    collapsed first: without this, an exclusion clause that happens to wrap mid-phrase
+    ("no la\n  uses para...") is never recognised, and every term it disclaims is
+    counted as a positive claim instead.
+    """
+    desc = " ".join(desc.split())
     m = NEGATIVE_CLAUSE_RE.search(desc)
     return (desc, "") if not m else (desc[: m.start()], desc[m.start() :])
 
@@ -303,9 +315,16 @@ def check_trigger_coverage(skills: list[dict]) -> None:
     print("  " + "-" * 72)
     for sc in scenarios:
         terms = [t.lower() for t in sc["terms"]]
-        matched = [n for n, (pos, _) in split.items() if any(hits(t, pos) for t in terms)]
+        # Score = how many DISTINCT scenario terms a description claims. A skill that
+        # matches one generic verb ("refactor") is not competing with one that matches
+        # six; counting membership instead of strength was flagging healthy separation
+        # as a precision failure.
+        score = {n: sum(hits(t, pos) for t in terms) for n, (pos, _) in split.items()}
+        matched = sorted((n for n, k in score.items() if k), key=lambda n: -score[n])
         excluded = [n for n, (_, neg) in split.items() if any(hits(t, neg) for t in terms)]
         expect = sc.get("expect", "")
+        shown = ", ".join(f"{n}({score[n]})" for n in matched) or "(none)"
+
         if expect == "none":
             status = "ok  " if not matched else "WARN"
             if matched:
@@ -328,15 +347,26 @@ def check_trigger_coverage(skills: list[dict]) -> None:
                 )
             else:
                 note(f"scenario '{sc['id']}': expected skill '{expect}' not built yet")
-        elif len(matched) > 3:
-            status = "WARN"
-            warn(
-                f"scenario '{sc['id']}': {len(matched)} skills compete "
-                f"({', '.join(matched)}) — predictable precision failure"
-            )
         else:
-            status = "ok  "
-        print(f"  {status} {sc['id']:<20} -> {', '.join(matched) if matched else '(none)'}")
+            # Precision risk is a rival claiming the scenario at least as strongly as
+            # the skill that is supposed to own it — not merely a rival existing.
+            # One shared generic verb ("build", "review") is noise, not competition:
+            # a rival needs at least two scenario terms before this proxy claims
+            # anything. Every rival is still printed, whatever its score.
+            rivals = [
+                n
+                for n in matched
+                if n != expect and score[n] >= max(2, score.get(expect, 0))
+            ]
+            if rivals:
+                status = "WARN"
+                warn(
+                    f"scenario '{sc['id']}': {', '.join(rivals)} match as strongly as "
+                    f"'{expect}' ({score.get(expect, 0)} term(s)) — precision risk"
+                )
+            else:
+                status = "ok  "
+        print(f"  {status} {sc['id']:<20} -> {shown}")
 
 
 # ---------------------------------------------------------------- legacy

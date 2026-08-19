@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "frontend",
+  "version": "0.1.0",
+  "description": "Interface work that has to survive a real user: accessibility and usability review of components, and strategic web design for sites that must not read as generic.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}

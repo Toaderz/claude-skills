@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "architecture",
+  "version": "0.1.0",
+  "description": "Interpretable Context Methodology: design a workspace where the folder structure carries the orchestration, or restructure an existing one to those conventions.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}

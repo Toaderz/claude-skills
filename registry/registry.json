@@ -10,10 +10,35 @@
       "path": "plugins/core-discipline/skills/preflight-planning/SKILL.md",
       "purpose": "Plan non-trivial work before executing it: objective, scope, constraints, risks, agent budget, and the simplest implementation that satisfies the requirement.",
       "triggers": {
-        "en": ["build", "create", "implement", "fix", "refactor", "migrate", "automate", "plan", "how should we"],
-        "es": ["construye", "crea", "implementa", "arregla", "refactoriza", "migra", "automatiza", "planifica", "cómo le hacemos"]
+        "en": [
+          "build",
+          "create",
+          "implement",
+          "fix",
+          "refactor",
+          "migrate",
+          "automate",
+          "plan",
+          "how should we"
+        ],
+        "es": [
+          "construye",
+          "crea",
+          "implementa",
+          "arregla",
+          "refactoriza",
+          "migra",
+          "automatiza",
+          "planifica",
+          "cómo le hacemos"
+        ]
       },
-      "excludes": ["single-fact questions", "typo fixes", "one-line edits", "requests framed as quick"],
+      "excludes": [
+        "single-fact questions",
+        "typo fixes",
+        "one-line edits",
+        "requests framed as quick"
+      ],
       "dependencies": [],
       "required_tools": [],
       "scope": "user",
@@ -34,12 +59,37 @@
       "path": "plugins/core-discipline/skills/project-memory/SKILL.md",
       "purpose": "Read and write durable project knowledge in .claude/memory/ so decisions, constraints, and lessons survive across sessions.",
       "triggers": {
-        "en": ["remember this", "next time", "always", "never", "don't do that again", "what did we decide", "why is it like this"],
-        "es": ["recuerda esto", "la próxima vez", "siempre", "nunca", "no vuelvas a", "qué decidimos", "por qué está así"]
+        "en": [
+          "remember this",
+          "next time",
+          "always",
+          "never",
+          "don't do that again",
+          "what did we decide",
+          "why is it like this"
+        ],
+        "es": [
+          "recuerda esto",
+          "la próxima vez",
+          "siempre",
+          "nunca",
+          "no vuelvas a",
+          "qué decidimos",
+          "por qué está así"
+        ]
       },
-      "excludes": ["conversation transcripts", "temporary state", "obvious facts", "anything that will not change a future decision"],
+      "excludes": [
+        "conversation transcripts",
+        "temporary state",
+        "obvious facts",
+        "anything that will not change a future decision"
+      ],
       "dependencies": [],
-      "required_tools": ["Read", "Write", "Edit"],
+      "required_tools": [
+        "Read",
+        "Write",
+        "Edit"
+      ],
       "backend": ".claude/memory/{MEMORY.md,decisions.md,lessons.md} in the target project",
       "scope": "user",
       "cost": "always resident; description only until it fires",
@@ -57,12 +107,28 @@
       "path": "plugins/core-discipline/agents/critical-reviewer.md",
       "purpose": "Adversarial review in an isolated context: try to prove the implementation is wrong. Read-only by construction so it cannot fix a problem and then declare the work sound.",
       "triggers": {
-        "en": ["critical review", "poke holes in this", "what could break", "second opinion"],
-        "es": ["revisa esto a fondo", "qué se puede romper", "segunda opinión"]
+        "en": [
+          "critical review",
+          "poke holes in this",
+          "what could break",
+          "second opinion"
+        ],
+        "es": [
+          "revisa esto a fondo",
+          "qué se puede romper",
+          "segunda opinión"
+        ]
       },
-      "excludes": ["trivial changes", "general code review — the built-in /code-review covers that"],
+      "excludes": [
+        "trivial changes",
+        "general code review — the built-in /code-review covers that"
+      ],
       "dependencies": [],
-      "required_tools": ["Read", "Grep", "Glob"],
+      "required_tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
       "scope": "user",
       "cost": "isolated context; costs nothing until dispatched",
       "replaces": [],
@@ -75,15 +141,235 @@
       "plugin": "core-discipline",
       "path": "plugins/core-discipline/commands/preflight.md",
       "purpose": "Explicit entry point for preflight-planning. Produces a visible plan and stops.",
-      "triggers": { "en": ["/preflight"], "es": ["/preflight"] },
+      "triggers": {
+        "en": [
+          "/preflight"
+        ],
+        "es": [
+          "/preflight"
+        ]
+      },
       "excludes": [],
-      "dependencies": ["preflight-planning"],
+      "dependencies": [
+        "preflight-planning"
+      ],
       "required_tools": [],
       "scope": "user",
       "cost": "one line of metadata",
       "replaces": [],
       "status": "active",
       "since": "0.1.0"
+    },
+    {
+      "name": "python-dev-discipline",
+      "type": "skill",
+      "plugin": "engineering",
+      "path": "plugins/engineering/skills/python-dev-discipline/SKILL.md",
+      "purpose": "Disciplined Python development: general heuristics over hardcoded patches, root-cause tracing through the pipeline, stable interfaces, and a regression test before anything is called done.",
+      "triggers": {
+        "en": [
+          "fix this bug",
+          "add this feature",
+          "refactor",
+          "new module",
+          "it's breaking",
+          "doesn't work for this case",
+          "write a parser",
+          "pipeline",
+          "detector"
+        ],
+        "es": [
+          "arregla este bug",
+          "agrega esta funcionalidad",
+          "refactoriza",
+          "módulo nuevo",
+          "se está rompiendo",
+          "no jala para este caso"
+        ]
+      },
+      "excludes": [
+        "one-off scripts",
+        "simple utilities",
+        "Python syntax questions"
+      ],
+      "dependencies": [],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [
+        "Improve code/develope_code.md"
+      ],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Migrated with the dangling references/advanced_heuristics.md pointer removed — the file never existed and its content is already inline."
+    },
+    {
+      "name": "deep-module-architecture",
+      "type": "skill",
+      "plugin": "engineering",
+      "path": "plugins/engineering/skills/deep-module-architecture/SKILL.md",
+      "purpose": "Find shallow modules whose interfaces cost as much as their implementations, and propose deepening them so behaviour is tested at one boundary instead of five.",
+      "triggers": {
+        "en": [
+          "refactor this",
+          "too many modules",
+          "tight coupling",
+          "hard to test",
+          "architecture review",
+          "how should I structure this",
+          "shallow modules"
+        ],
+        "es": [
+          "revisa la arquitectura",
+          "está muy acoplado",
+          "difícil de testear",
+          "cómo estructuro esto"
+        ]
+      },
+      "excludes": [
+        "one-off scripts",
+        "single bug fixes",
+        "syntax questions",
+        "ordinary code review (built-in /code-review)"
+      ],
+      "dependencies": [
+        "references/dependency-categories.md"
+      ],
+      "required_tools": [
+        "mcp__github__issue_write (optional; degrades to markdown output)"
+      ],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [
+        "Improve code/SKILL.md",
+        "Improve code/REFERENCE.md"
+      ],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Renamed from improve-codebase-architecture to avoid colliding with two account-synced copies. gh issue create replaced by mcp__github__issue_write; the mandatory 3-agent fan-out is now conditional on the interface being genuinely contested."
+    },
+    {
+      "name": "icm-architect",
+      "type": "skill",
+      "plugin": "architecture",
+      "path": "plugins/architecture/skills/icm-architect/SKILL.md",
+      "purpose": "Design a process, body of knowledge, or codebase into an ICM workspace where folder structure carries the orchestration, or restructure an existing folder into one.",
+      "triggers": {
+        "en": [
+          "make this an ICM",
+          "map this repo",
+          "structure this for agents",
+          "build me a workspace",
+          "organize these notes",
+          "context map",
+          "second brain"
+        ],
+        "es": [
+          "estructura este repo",
+          "organiza esto para agentes",
+          "mapea este repo",
+          "arma un workspace"
+        ]
+      },
+      "excludes": [
+        "one-off or non-repeating work",
+        "a single throwaway script",
+        "being applied by default to every new project"
+      ],
+      "dependencies": [
+        "references/core.md",
+        "references/forms.md",
+        "references/system-map.md",
+        "assets/templates/"
+      ],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [
+        "icm-architect/",
+        "project-structure-governor/"
+      ],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "The 'Auto-use in this account' section and the auto-apply clause in the description were removed: they contradicted the skill's own guardrail that a workspace for something done twice is scaffolding, not architecture. MIT attribution (Van Clief & McDermott) preserved in SOURCE.md and LICENSE."
+    },
+    {
+      "name": "diseno-web-estrategico",
+      "type": "skill",
+      "plugin": "frontend",
+      "path": "plugins/frontend/skills/diseno-web-estrategico/SKILL.md",
+      "purpose": "Strategic web design synthesising three methodologies, with a rule hierarchy: what all three authors agree on is mandatory, what only one mentions is optional with judgement.",
+      "triggers": {
+        "en": [
+          "build me a landing page",
+          "make this look premium",
+          "this looks AI-generated",
+          "design review before launch",
+          "client handoff"
+        ],
+        "es": [
+          "landing premium",
+          "se ve genérico",
+          "se ve de IA",
+          "handoff a cliente",
+          "¿ya está listo para publicar?"
+        ]
+      },
+      "excludes": [
+        "backend logic bugs",
+        "utility scripts",
+        "tasks with no visual surface"
+      ],
+      "dependencies": [],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [
+        "account-synced diseno-web-estrategico (retire from claude.ai)"
+      ],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Imported verbatim from the account-synced copy; body left in Spanish deliberately rather than translated, to avoid drift in content this repo did not author. No paths: filter — the skill has to fire before any component file exists."
+    },
+    {
+      "name": "news-prioritization",
+      "type": "skill",
+      "plugin": "finance",
+      "path": "plugins/finance/skills/news-prioritization/SKILL.md",
+      "purpose": "Rank macro-financial news by macro impact, surprise, and direct relevance to a tracked investment universe, producing a scored shortlist with one actionable insight each.",
+      "triggers": {
+        "en": [
+          "weekly news",
+          "what matters this week",
+          "macro recap",
+          "news for my portfolio",
+          "rank these headlines"
+        ],
+        "es": [
+          "qué pasó en los mercados",
+          "noticias de la semana",
+          "qué me afecta del portafolio",
+          "resumen macro"
+        ]
+      },
+      "excludes": [
+        "general or non-financial news",
+        "single company lookups",
+        "building a portfolio"
+      ],
+      "dependencies": [
+        ".claude/investment_universe.md (project-supplied, NOT bundled)"
+      ],
+      "required_tools": [],
+      "scope": "project",
+      "cost": "description only until it fires",
+      "replaces": [
+        "research/SKILL.md",
+        "research/news-prioritization.skill (ZIP)"
+      ],
+      "status": "active",
+      "since": "0.1.0",
+      "notes": "Moved to its own finance plugin rather than research, so the generic research plugin stays installable anywhere. The '## Assets (Exact Match)' contract was broken — no such heading exists — and now matches the real sector-heading structure. The universe itself is personal holdings and is NOT bundled: this repository is public, so the plugin ships only a format example and reads the real file from the project. The skill states the gap explicitly when no universe is found instead of scoring portfolio relevance without one."
     }
   ],
   "deferred": [

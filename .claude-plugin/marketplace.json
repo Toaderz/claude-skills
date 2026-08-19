@@ -13,7 +13,64 @@
       "displayName": "Core Discipline",
       "description": "Plan before executing and remember what matters across sessions. Install once at user scope; applies to every project.",
       "category": "workflow",
-      "tags": ["planning", "memory", "review", "discipline"]
+      "tags": [
+        "planning",
+        "memory",
+        "review",
+        "discipline"
+      ]
+    },
+    {
+      "name": "engineering",
+      "source": "./plugins/engineering",
+      "displayName": "Engineering",
+      "description": "Python development discipline and deep-module architecture review. Install per project, in repositories with real code.",
+      "category": "development",
+      "tags": [
+        "python",
+        "architecture",
+        "refactoring",
+        "testing"
+      ]
+    },
+    {
+      "name": "architecture",
+      "source": "./plugins/architecture",
+      "displayName": "Architecture",
+      "description": "ICM: folder structure as agent architecture, for building a workspace or restructuring an existing one. Install where the structure itself is the work.",
+      "category": "workflow",
+      "tags": [
+        "icm",
+        "structure",
+        "workspace",
+        "knowledge"
+      ]
+    },
+    {
+      "name": "frontend",
+      "source": "./plugins/frontend",
+      "displayName": "Frontend",
+      "description": "Interface review and strategic web design. Install per project, in repositories with a user-facing surface.",
+      "category": "development",
+      "tags": [
+        "ui",
+        "ux",
+        "accessibility",
+        "design"
+      ]
+    },
+    {
+      "name": "finance",
+      "source": "./plugins/finance",
+      "displayName": "Finance",
+      "description": "Macro-financial news triage scored against a tracked investment universe. Domain-specific: install only in projects that follow markets.",
+      "category": "data",
+      "tags": [
+        "markets",
+        "news",
+        "macro",
+        "research"
+      ]
     }
   ]
 }
