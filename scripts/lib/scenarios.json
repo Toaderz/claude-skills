@@ -1,0 +1,81 @@
+{
+  "_comment": "Scenarios used by the static trigger-coverage matrix in lint.py. This is a LEXICAL PROXY, not proof of routing: the real matcher is semantic. It exists to catch scenarios no description covers (guaranteed recall failure) and scenarios many descriptions compete for (predictable precision failure), before those problems ship. See docs/architecture.md.",
+  "scenarios": [
+    {
+      "id": "trivial",
+      "prompt": "Rename this variable and fix the typo in the comment.",
+      "terms": ["rename", "typo", "one-line", "trivial", "small edit"],
+      "expect": "none",
+      "note": "Negative assertion. A trivial edit must not pull in domain plugins or multiple agents."
+    },
+    {
+      "id": "python",
+      "prompt": "Add a retry decorator to this Python data pipeline and handle the timeout case.",
+      "terms": ["python", "refactor", "module", "pipeline", "bug", "feature"],
+      "expect": "python-dev-discipline"
+    },
+    {
+      "id": "web-api",
+      "prompt": "Build a REST endpoint that validates the payload and returns proper error codes.",
+      "terms": ["api", "endpoint", "backend", "service", "build", "create"],
+      "expect": "preflight-planning"
+    },
+    {
+      "id": "research",
+      "prompt": "Investiga qué dice la evidencia sobre este tema y cita las fuentes primarias.",
+      "terms": ["research", "investiga", "sources", "fuentes", "evidence", "evidencia", "cite"],
+      "expect": "deep-research"
+    },
+    {
+      "id": "comparison",
+      "prompt": "Compare these three options and tell me which one to pick.",
+      "terms": ["compare", "compara", "options", "opciones", "which one", "recommend", "recomienda", "trade-off"],
+      "expect": "decision-comparison"
+    },
+    {
+      "id": "ui",
+      "prompt": "Review this React component for accessibility and responsive layout problems.",
+      "terms": ["ui", "ux", "accessibility", "accesibilidad", "responsive", "component", "design"],
+      "expect": "ui-ux-review"
+    },
+    {
+      "id": "architecture-audit",
+      "prompt": "This codebase is tangled — find where the coupling hurts and propose a structure.",
+      "terms": ["architecture", "arquitectura", "coupling", "acoplamiento", "refactor", "testable", "structure"],
+      "expect": "deep-module-architecture"
+    },
+    {
+      "id": "large-project",
+      "prompt": "Empecemos un proyecto nuevo: quiero un flujo repetible para producir estos reportes.",
+      "terms": ["new project", "proyecto nuevo", "workspace", "repeatable", "repetible", "workflow", "flujo", "organize", "organiza"],
+      "expect": "icm-architect"
+    },
+    {
+      "id": "document",
+      "prompt": "Read this PDF and pull out the numbers from the tables.",
+      "terms": ["pdf", "docx", "xlsx", "spreadsheet", "document", "documento"],
+      "expect": "none",
+      "note": "Negative assertion. Built-in document skills cover this; no repo skill should compete."
+    },
+    {
+      "id": "email",
+      "prompt": "Check my inbox and summarize what needs a reply today.",
+      "terms": ["email", "inbox", "correo", "gmail", "reply"],
+      "expect": "none",
+      "note": "Negative assertion. The official connector covers this; see integrations/email.md."
+    },
+    {
+      "id": "video",
+      "prompt": "Extract the key frames from this video and tell me what's in them.",
+      "terms": ["video", "frames", "audio", "transcribe", "transcribir", "ffmpeg"],
+      "expect": "none",
+      "note": "Negative assertion for phase 1. Media skills are deferred; integrations/media.md documents the gap."
+    },
+    {
+      "id": "multi-agent",
+      "prompt": "This is a big change across several subsystems — plan it out and check the work when it's done.",
+      "terms": ["plan", "planifica", "multi-step", "complex", "complejo", "review", "revisa", "audit", "audita"],
+      "expect": "preflight-planning"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ai-engineering-os",
+  "description": "Reusable engineering-discipline capabilities for Claude Code: planning before execution, project memory, adversarial review, and domain skills installed per project.",
+  "owner": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  },
+  "plugins": [
+    {
+      "name": "core-discipline",
+      "source": "./plugins/core-discipline",
+      "displayName": "Core Discipline",
+      "description": "Plan before executing and remember what matters across sessions. Install once at user scope; applies to every project.",
+      "category": "workflow",
+      "tags": ["planning", "memory", "review", "discipline"]
+    }
+  ]
+}

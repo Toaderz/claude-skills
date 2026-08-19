@@ -1,0 +1,10 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "core-discipline",
+  "version": "0.1.0",
+  "description": "Plan before executing and remember what matters across sessions. Ships the preflight-planning and project-memory skills, the read-only critical-reviewer subagent, and the /preflight command.",
+  "author": {
+    "name": "Toaderz",
+    "url": "https://github.com/Toaderz/claude-skills"
+  }
+}
