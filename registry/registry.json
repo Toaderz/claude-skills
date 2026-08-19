@@ -45,12 +45,12 @@
       "cost": "always resident; description only until it fires",
       "replaces": [
         "Claude_optimization/execution-planning.md",
-        "Claude_optimization/pulse-token-efficiency-compactor.md (reading discipline and output rules)",
-        "workflow-orchestrator/SKILL.md (skill-selection role)",
+        "workflow-orchestrator/SKILL.md (skill-selection and task-classification role)",
         "project-structure-governor/SKILL.md (workflow-governance role)"
       ],
       "status": "active",
-      "since": "0.1.0"
+      "since": "0.1.0",
+      "notes": "Consolidates the four competing orchestrators. Claude_optimization/pulse-token-efficiency-compactor.md is NOT absorbed and is not claimed as replaced: only its 'budget the context you load' idea survives, as one line in the agent budget. Its reading strategies duplicate guidance the Read tool already gives natively, and its code-compaction rules are generic style advice that was never invocable — the file had no frontmatter at all."
     },
     {
       "name": "project-memory",
