@@ -211,6 +211,10 @@ def check_links(md_files: list[Path]) -> None:
 
 
 def check_duplicates(files: list[Path]) -> None:
+    # Eval graders legitimately repeat identical one-line assertions across cases —
+    # "preflight-planning fired" means the same thing wherever it is asserted. Only
+    # capability content is checked for accidental duplication.
+    files = [f for f in files if "/evals/" not in f.as_posix()]
     by_hash: dict[str, list[Path]] = {}
     for f in files:
         h = hashlib.md5(f.read_bytes()).hexdigest()

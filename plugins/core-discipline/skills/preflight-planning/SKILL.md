@@ -1,17 +1,15 @@
 ---
 name: preflight-planning
 description: >
-  Plans non-trivial work before executing it — objective, scope, constraints, risks,
-  which capabilities apply, an explicit agent budget, and the simplest implementation
-  that satisfies the requirement. Use when a request touches more than one file or
-  step, when requirements are ambiguous, when several approaches are viable, when a
-  previous attempt failed, or when the user says "build", "create", "implement",
-  "fix", "refactor", "migrate", "automate", "plan", "how should we", "construye",
-  "crea", "implementa", "arregla", "refactoriza", "migra", "automatiza", "planifica",
+  Plans non-trivial work before executing it: objective, scope, constraints, risks, an
+  explicit agent budget, and the simplest implementation that meets the requirement.
+  Use when work spans more than one file or step, requirements are ambiguous, several
+  approaches are viable, a previous attempt failed, or the user says build, implement,
+  refactor, migrate, automate, plan, construye, implementa, refactoriza, planifica,
   "cómo le hacemos". Also use before dispatching any subagent, to decide whether one
   is warranted at all. Do NOT use for single-fact questions, typo fixes, one-line
-  edits, reading or explaining a file, or any request the user framed as quick
-  ("rápido", "just do it", "nada más dime").
+  edits, explaining existing code, or anything framed as quick ("rápido", "just do
+  it").
 ---
 
 # Preflight planning

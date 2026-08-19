@@ -2,16 +2,13 @@
 name: project-memory
 description: >
   Reads and writes durable project knowledge in .claude/memory/ so decisions,
-  constraints, and hard-won lessons survive across sessions instead of being
-  re-derived. Use at the start of substantive work to recall what is already known
-  about this codebase, and after a decision is made with tradeoffs, a constraint is
-  discovered, an approach fails instructively, the user corrects an approach, or the
-  user says "remember this", "next time", "always", "never", "don't do that again",
-  "recuerda esto", "la próxima vez", "siempre", "nunca", "no vuelvas a". Also use
-  when asked what was decided before or why something is the way it is. Do NOT use to
-  log conversation transcripts, restate obvious facts, record temporary state, or
-  store anything that will not change a future decision — memory exists to reduce
-  repeated context, not to accumulate it.
+  constraints, and lessons survive across sessions instead of being re-derived. Use
+  when starting substantive work on a codebase, after a decision with real tradeoffs,
+  when a constraint is discovered or an approach fails instructively, when the user
+  corrects an approach, when asked what was decided before or why something is the way
+  it is, or on "remember this", "next time", "always", "never", "recuerda esto", "la
+  próxima vez", "no vuelvas a". Do NOT use to log transcripts, record temporary state,
+  restate obvious facts, or store anything that will not change a future decision.
 ---
 
 # Project memory

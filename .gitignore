@@ -1,0 +1,20 @@
+# Local Claude Code state. settings.local.json records machine-specific marketplace
+# paths and enabled plugins — committing it would push one machine's absolute paths
+# onto everyone else.
+.claude/settings.local.json
+.claude/memory/
+
+# Eval results. Runs are per-machine and can be large.
+plugins/*/evals/results/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/

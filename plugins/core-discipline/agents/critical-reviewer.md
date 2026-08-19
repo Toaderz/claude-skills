@@ -1,13 +1,12 @@
 ---
 name: critical-reviewer
 description: >
-  Adversarial reviewer that tries to prove an implementation is wrong. Delegate after
-  substantive work is complete and before it is called done, when a change carries
-  real risk, or when the user asks for a critical review, a second opinion, or wants
-  to know what could break ("revisa esto a fondo", "qué se puede romper", "critical
-  review", "poke holes in this"). Read-only by construction: it reports, it never
-  edits. Do not delegate for trivial changes, and do not use it as a general code
-  reviewer — the built-in /code-review covers that.
+  Adversarial reviewer that tries to prove an implementation is wrong, in an isolated
+  read-only context. Delegate after substantive work is complete and before calling it
+  done, when a change carries real risk, or on "revisa esto a fondo", "qué se puede
+  romper", "critical review", "poke holes in this", "second opinion". Do NOT delegate
+  for trivial changes or as a general code reviewer — the built-in /code-review covers
+  that.
 tools:
   - Read
   - Grep
