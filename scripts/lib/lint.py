@@ -249,24 +249,38 @@ def check_registry(skills: list[dict]) -> None:
         return
 
     entries = data.get("capabilities", [])
-    registered = {e.get("name") for e in entries}
-    on_disk = {s["name"] for s in skills}
 
     for e in entries:
         name, path = e.get("name"), e.get("path")
         if path and not (REPO / path).exists():
             err(f"registry: '{name}' points at missing path {path}")
-        for field in ("name", "type", "plugin", "path", "purpose", "scope"):
+        for field in ("name", "type", "plugin", "path", "purpose", "scope", "status"):
             if not e.get(field):
                 err(f"registry: '{name or '?'}' is missing required field '{field}'")
 
-    for orphan in sorted(registered - on_disk - {e.get("name") for e in entries if e.get("type") != "skill"}):
-        err(f"registry: '{orphan}' is registered but no skill of that name exists on disk")
-    for missing in sorted(on_disk - registered):
+    registered_skills = {e.get("name") for e in entries if e.get("type") == "skill"}
+    on_disk = {s["name"] for s in skills}
+
+    for orphan in sorted(registered_skills - on_disk):
+        err(f"registry: skill '{orphan}' is registered but does not exist on disk")
+    for missing in sorted(on_disk - registered_skills):
         err(f"registry: skill '{missing}' exists on disk but is not registered")
 
 
 # ---------------------------------------------------------------- coverage
+
+
+# A description's "do NOT use" clause is what buys precision. Terms appearing there
+# mean the skill explicitly disclaims the scenario — the opposite of competing for it.
+NEGATIVE_CLAUSE_RE = re.compile(
+    r"\b(do not use|don't use|do not trigger|no uses|nunca uses|not for)\b", re.I
+)
+
+
+def split_description(desc: str) -> tuple[str, str]:
+    """Return (positive claim, exclusion clause) of a skill description."""
+    m = NEGATIVE_CLAUSE_RE.search(desc)
+    return (desc, "") if not m else (desc[: m.start()], desc[m.start() :])
 
 
 def check_trigger_coverage(skills: list[dict]) -> None:
@@ -275,22 +289,30 @@ def check_trigger_coverage(skills: list[dict]) -> None:
         return
     scenarios = json.loads(SCENARIOS.read_text(encoding="utf-8"))["scenarios"]
 
+    split = {s["name"]: split_description(s["description"].lower()) for s in skills}
+
+    def hits(term: str, text: str) -> bool:
+        # Word-boundary match, so "trivial" does not fire inside "non-trivial".
+        return re.search(rf"(?<![\w-]){re.escape(term)}(?![\w-])", text) is not None
+
     print("\n  Static trigger-coverage matrix (lexical proxy — NOT proof of routing)")
     print("  " + "-" * 72)
     for sc in scenarios:
         terms = [t.lower() for t in sc["terms"]]
-        matched = [
-            s["name"]
-            for s in skills
-            if any(t in s["description"].lower() for t in terms)
-        ]
+        matched = [n for n, (pos, _) in split.items() if any(hits(t, pos) for t in terms)]
+        excluded = [n for n, (_, neg) in split.items() if any(hits(t, neg) for t in terms)]
         expect = sc.get("expect", "")
         if expect == "none":
             status = "ok  " if not matched else "WARN"
             if matched:
                 warn(
                     f"scenario '{sc['id']}' expects no repo skill to compete, but "
-                    f"{', '.join(matched)} match its terms. {sc.get('note', '')}"
+                    f"{', '.join(matched)} claim it. {sc.get('note', '')}"
+                )
+            elif excluded:
+                note(
+                    f"scenario '{sc['id']}': explicitly excluded by "
+                    f"{', '.join(excluded)} — the exclusion clause is doing its job"
                 )
         elif expect and expect not in matched:
             status = "GAP "

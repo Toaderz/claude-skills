@@ -1,0 +1,103 @@
+{
+  "_comment": "Human and maintenance inventory of every capability in this repository. NOT a runtime router: Claude never reads this file per request. Routing is Claude Code's native description matching. See docs/architecture.md.",
+  "version": "0.1.0",
+  "updated": "2026-08-19",
+  "capabilities": [
+    {
+      "name": "preflight-planning",
+      "type": "skill",
+      "plugin": "core-discipline",
+      "path": "plugins/core-discipline/skills/preflight-planning/SKILL.md",
+      "purpose": "Plan non-trivial work before executing it: objective, scope, constraints, risks, agent budget, and the simplest implementation that satisfies the requirement.",
+      "triggers": {
+        "en": ["build", "create", "implement", "fix", "refactor", "migrate", "automate", "plan", "how should we"],
+        "es": ["construye", "crea", "implementa", "arregla", "refactoriza", "migra", "automatiza", "planifica", "cómo le hacemos"]
+      },
+      "excludes": ["single-fact questions", "typo fixes", "one-line edits", "requests framed as quick"],
+      "dependencies": [],
+      "required_tools": [],
+      "scope": "user",
+      "cost": "always resident; description only until it fires",
+      "replaces": [
+        "Claude_optimization/execution-planning.md",
+        "Claude_optimization/pulse-token-efficiency-compactor.md (reading discipline and output rules)",
+        "workflow-orchestrator/SKILL.md (skill-selection role)",
+        "project-structure-governor/SKILL.md (workflow-governance role)"
+      ],
+      "status": "active",
+      "since": "0.1.0"
+    },
+    {
+      "name": "project-memory",
+      "type": "skill",
+      "plugin": "core-discipline",
+      "path": "plugins/core-discipline/skills/project-memory/SKILL.md",
+      "purpose": "Read and write durable project knowledge in .claude/memory/ so decisions, constraints, and lessons survive across sessions.",
+      "triggers": {
+        "en": ["remember this", "next time", "always", "never", "don't do that again", "what did we decide", "why is it like this"],
+        "es": ["recuerda esto", "la próxima vez", "siempre", "nunca", "no vuelvas a", "qué decidimos", "por qué está así"]
+      },
+      "excludes": ["conversation transcripts", "temporary state", "obvious facts", "anything that will not change a future decision"],
+      "dependencies": [],
+      "required_tools": ["Read", "Write", "Edit"],
+      "backend": ".claude/memory/{MEMORY.md,decisions.md,lessons.md} in the target project",
+      "scope": "user",
+      "cost": "always resident; description only until it fires",
+      "replaces": [
+        "Claude_optimization/memory.md",
+        "Claude_optimization/pattern-learning.md"
+      ],
+      "status": "active",
+      "since": "0.1.0"
+    },
+    {
+      "name": "critical-reviewer",
+      "type": "agent",
+      "plugin": "core-discipline",
+      "path": "plugins/core-discipline/agents/critical-reviewer.md",
+      "purpose": "Adversarial review in an isolated context: try to prove the implementation is wrong. Read-only by construction so it cannot fix a problem and then declare the work sound.",
+      "triggers": {
+        "en": ["critical review", "poke holes in this", "what could break", "second opinion"],
+        "es": ["revisa esto a fondo", "qué se puede romper", "segunda opinión"]
+      },
+      "excludes": ["trivial changes", "general code review — the built-in /code-review covers that"],
+      "dependencies": [],
+      "required_tools": ["Read", "Grep", "Glob"],
+      "scope": "user",
+      "cost": "isolated context; costs nothing until dispatched",
+      "replaces": [],
+      "status": "active",
+      "since": "0.1.0"
+    },
+    {
+      "name": "preflight",
+      "type": "command",
+      "plugin": "core-discipline",
+      "path": "plugins/core-discipline/commands/preflight.md",
+      "purpose": "Explicit entry point for preflight-planning. Produces a visible plan and stops.",
+      "triggers": { "en": ["/preflight"], "es": ["/preflight"] },
+      "excludes": [],
+      "dependencies": ["preflight-planning"],
+      "required_tools": [],
+      "scope": "user",
+      "cost": "one line of metadata",
+      "replaces": [],
+      "status": "active",
+      "since": "0.1.0"
+    }
+  ],
+  "deferred": [
+    {
+      "name": "security-auditor",
+      "type": "agent",
+      "reason": "Duplicates the built-in /security-review, which is already maintained upstream. postflight-audit invokes the built-in instead. Build only if the built-in proves insufficient, and record that finding first.",
+      "gate": "docs/capability-policy.md"
+    },
+    {
+      "name": "test-engineer",
+      "type": "agent",
+      "reason": "Context isolation is a cost here, not a benefit: an agent that did not see what was just built writes worse tests than the main agent that did. Build only for a case where isolation genuinely helps, such as long noisy suites that would flood the main context.",
+      "gate": "docs/capability-policy.md"
+    }
+  ]
+}
