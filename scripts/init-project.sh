@@ -9,11 +9,32 @@ set -uo pipefail
 MARKETPLACE_NAME="ai-engineering-os"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Prefer a portable GitHub reference over a bare $REPO_ROOT path. A project that
+# commits its plugin config is meant to be opened in a *different* container later —
+# a local directory path only resolves on the machine that ran this script once.
+# Falls back to the local path when REPO_ROOT isn't a GitHub-hosted checkout, which
+# is this library's own dev loop (testing an uncommitted change before it's pushed).
+marketplace_source() {
+  local remote
+  remote="$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)"
+  case "$remote" in
+    *github.com*)
+      remote="${remote#git@github.com:}"
+      remote="${remote#https://github.com/}"
+      remote="${remote%.git}"
+      printf '%s\n' "$remote"
+      ;;
+    *) printf '%s\n' "$REPO_ROOT" ;;
+  esac
+}
+MARKETPLACE_SOURCE="$(marketplace_source)"
+
 DRY_RUN=0
 ASSUME_YES=0
 SCOPE="project"
 EXPLICIT=""
 TARGET="$PWD"
+WITH_HOOK=0
 
 bold=$'\033[1m'; red=$'\033[31m'; green=$'\033[32m'; yellow=$'\033[33m'; off=$'\033[0m'
 say()  { printf '%s\n' "$*"; }
@@ -29,6 +50,12 @@ Usage: init-project.sh [options] [target-directory]
   --only a,b,c   Install exactly these plugins; skip detection entirely.
   --all          Install every plugin. Rarely right — see the cost note below.
   --scope S      user | project | local   (default: project)
+  --with-hook    Also write a SessionStart hook so a *future* session — in a
+                 different, fresh container — re-installs this project's plugins
+                 on its own. Needed on Claude Code on the web: containers are
+                 ephemeral, so nothing installed today survives to the next
+                 session except what gets committed. Local Claude Code doesn't
+                 need this — --scope user there already persists across sessions.
   --dry-run      Print what would happen. Change nothing.
   -y, --yes      Do not prompt.
   -h, --help     This text.
@@ -54,6 +81,7 @@ while [ $# -gt 0 ]; do
       # argument forever — `init-project.sh --scope` hung silently.
       [ $# -ge 2 ] && [ -n "${2:-}" ] || die "--scope needs a value: user, project, or local"
       SCOPE="$2"; shift 2 ;;
+    --with-hook) WITH_HOOK=1; shift ;;
     --dry-run) DRY_RUN=1; shift ;;
     -y|--yes) ASSUME_YES=1; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -165,11 +193,11 @@ say "${bold}Marketplace${off}"
 if claude plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE_NAME"; then
   ok "already registered: $MARKETPLACE_NAME"
 else
-  if out=$(claude plugin marketplace add "$REPO_ROOT" --scope "$SCOPE" 2>&1); then
-    ok "registered: $MARKETPLACE_NAME"
+  if out=$(claude plugin marketplace add "$MARKETPLACE_SOURCE" --scope "$SCOPE" 2>&1); then
+    ok "registered: $MARKETPLACE_NAME ($MARKETPLACE_SOURCE)"
   else
     say "$out" >&2
-    die "could not register the marketplace from $REPO_ROOT"
+    die "could not register the marketplace from $MARKETPLACE_SOURCE"
   fi
 fi
 
@@ -213,6 +241,34 @@ info "installed now: $installed_now    already present: $already    failed: $fai
 
 if [ "$failed" -gt 0 ]; then
   die "$failed plugin(s) failed to install. Nothing was rolled back; re-run after fixing the cause."
+fi
+
+if [ "$WITH_HOOK" -eq 1 ]; then
+  say ""
+  say "${bold}Session-start hook${off}"
+  mkdir -p "$TARGET/.claude/hooks"
+  cat > "$TARGET/.claude/hooks/session-start.sh" <<HOOK
+#!/bin/bash
+# Re-registers $MARKETPLACE_NAME and installs this project's plugins on every
+# session start. Written by init-project.sh --with-hook — containers on Claude
+# Code on the web are ephemeral, so this has to run every time, not once.
+set -euo pipefail
+
+claude plugin marketplace add "$MARKETPLACE_SOURCE" --scope project >/dev/null 2>&1 || true
+
+INIT="\$HOME/.claude/plugins/marketplaces/$MARKETPLACE_NAME/scripts/init-project.sh"
+if [ -x "\$INIT" ]; then
+  bash "\$INIT" -y --scope project "\$CLAUDE_PROJECT_DIR"
+fi
+HOOK
+  chmod +x "$TARGET/.claude/hooks/session-start.sh"
+
+  if python3 "$REPO_ROOT/scripts/lib/merge_session_hook.py" "$TARGET/.claude/settings.json"; then
+    ok "wrote .claude/hooks/session-start.sh, wired into .claude/settings.json"
+    info "commit both, once. Every future session on this project installs itself from there."
+  else
+    die "wrote the hook script but could not wire it into $TARGET/.claude/settings.json"
+  fi
 fi
 
 say ""

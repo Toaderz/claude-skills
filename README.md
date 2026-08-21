@@ -33,6 +33,29 @@ a project does research or follows markets — so ask for them:
 bash scripts/init-project.sh --only research,architecture /path/to/project
 ```
 
+### Claude Code on the web: `--with-hook`
+
+The instructions above assume `~/.claude` persists between sessions — true on a local
+install, false on the web. There, every session is a **fresh, ephemeral container**:
+nothing installed today survives to the next one except what gets committed to the
+project's own repo.
+
+Add `--with-hook` once, per project, and commit the result:
+
+```bash
+bash scripts/init-project.sh --with-hook /path/to/project
+git -C /path/to/project add .claude/hooks .claude/settings.json
+git -C /path/to/project commit -m "Install AI Engineering OS plugins on session start"
+```
+
+This writes `.claude/hooks/session-start.sh` — a `SessionStart` hook that re-registers
+the marketplace and reinstalls this project's detected plugins at the start of *every*
+future session, in *any* container, with nothing asked of you or of Claude. The
+marketplace is referenced by its GitHub source (`Toaderz/claude-skills`), not a local
+path, precisely so it resolves in a container that never saw this one.
+
+One command, once, at project creation — after that, genuinely zero-ask.
+
 ---
 
 ## The honest trade-off
